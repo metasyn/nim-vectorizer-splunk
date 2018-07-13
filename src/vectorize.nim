@@ -31,37 +31,40 @@ proc parseArgs(args: JsonNode): tuple[field: string, nFeatures, nDimensions: int
     raise newException(ValueError, err)
   
   let field = elems[0].getStr()
+  error(field)
+  error(elems)
   
-  for i in 1..len(elems)-1:
-    let split = elems[i].getStr().split("=")
-    error(split)
-    if split[0] == "n_features":
-      try:
-        nFeatures = parseInt(split[1])
-      except:
-        let err = fmt"Sytnax error: cannot parse n_features: {syntax}"
+  if len(elems) > 1:
+    error("hi")
+    for i in 1..len(elems)-1:
+      let split = elems[i].getStr().split("=")
+      if split[0] == "n_features":
+        try:
+          nFeatures = parseInt(split[1])
+        except:
+          let err = fmt"Sytnax error: cannot parse n_features: {syntax}"
+          error(err)
+          raise newException(ValueError, err)
+      elif split[0] == "n_dimensions":
+        try:
+          nDimensions = parseInt(split[1])
+        except:
+          let err = fmt"Sytnax error: cannot parse n_dimensions: {syntax}"
+          error(err)
+          raise newException(ValueError, err)
+      elif split[0] == "ngram_range":
+        try:
+          let splitRange = split(split[1], "-")
+          nGramRange[0] = parseInt(splitRange[0])
+          nGramRange[1] = parseInt(splitRange[1])
+        except:
+          let err = fmt"Sytnax error: cannot parse ngram_range: {syntax}"
+          error(err)
+          raise newException(ValueError, err)
+      else:
+        let err = fmt"Sytnax error: unrecognized parameter {split[0]}: {syntax}"
         error(err)
         raise newException(ValueError, err)
-    elif split[0] == "n_dimensions":
-      try:
-        nDimensions = parseInt(split[1])
-      except:
-        let err = fmt"Sytnax error: cannot parse n_dimensions: {syntax}"
-        error(err)
-        raise newException(ValueError, err)
-    elif split[0] == "ngram_range":
-      try:
-        let splitRange = split(split[1], "-")
-        nGramRange[0] = parseInt(splitRange[0])
-        nGramRange[1] = parseInt(splitRange[1])
-      except:
-        let err = fmt"Sytnax error: cannot parse ngram_range: {syntax}"
-        error(err)
-        raise newException(ValueError, err)
-    else:
-      let err = fmt"Sytnax error: unrecognized parameter {split[0]}: {syntax}"
-      error(err)
-      raise newException(ValueError, err)
 
   return (field, nFeatures, nDimensions, nGramRange)
 
@@ -110,7 +113,6 @@ proc handleExecute(metadata: JsonNode, body: string): tuple[metadata: JsonNode, 
   let normTensor = baseTensor ./ sqrt(baseTensor * baseTensor).sum(axis=1)
 
   let 
-    # (_, components) = pca(normTensor, nDimensions)
     returnMetadata = %* {"finished": true}
     fields = makeFields(fmt"{field}_hashed_", nFeatures)
     outBody = writeBody(body, fields, normTensor)

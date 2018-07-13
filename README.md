@@ -13,7 +13,11 @@ See HACK-711 for details.
 
 # building
 
-Requirements: nim 0.18+ 
+Requirements: 
+ * nim 0.18+ 
+ * develop [arraymancer](https://github.com/mratsim/arraymancer)
+ * murmur3
+
 If you don't have nim, try installing with choosenim:
 
 ```
@@ -22,7 +26,16 @@ choosenim stable
 nim -v
 ```
 
-Then you can run:
+then install packages
+
+```
+nimble install murmur3
+git clone https://github.com/mratsim/arraymancer
+cd arraymancer
+nimble install
+```
+
+Then you can should be able to run:
 
 ```
 ./build.sh
